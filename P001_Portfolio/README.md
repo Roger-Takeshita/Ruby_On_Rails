@@ -9,6 +9,9 @@
     - [Controller Workflow](#controller-workflow)
     - [Controllers](#controllers)
       - [Generate Pages](#generate-pages)
+    - [Model](#model)
+      - [Model Generator](#model-generator)
+      - [Rails Console](#rails-console)
 
 # PROJECT 001 - PORTFOLIO
 
@@ -327,6 +330,12 @@
 
 ### Controllers
 
+[Go Back to Contents](#contents)
+
+- The good practices when we are generating a new controller is to:
+  - Capitalize the name
+  - Plural verb
+
 #### Generate Pages
 
 [Go Back to Contents](#contents)
@@ -356,3 +365,59 @@
 
 - MVC (Model View Controller)
   - It gives a dataflow
+
+### Model
+
+[Go Back to Contents](#contents)
+
+- The good practices when we are generating a new model is to:
+  - Capitalize the name
+  - Singular verb
+
+#### Model Generator
+
+[Go Back to Contents](#contents)
+
+- On `Terminal`
+
+  ```Bash
+    rails g model Skill title:string percent_utilized:integer
+    # Running via Spring preloader in process 38873
+    # invoke  active_record
+    # create    db/migrate/20201126224644_create_skills.rb
+    # create    app/models/skill.rb
+    rails db:migrate
+    # == 20201126224644 CreateSkills: migrating =====================================
+    # -- create_table(:skills)
+    #    -> 0.0365s
+    # == 20201126224644 CreateSkills: migrated (0.0365s) ============================
+  ```
+
+#### Rails Console
+
+[Go Back to Contents](#contents)
+
+- On `Terminal`
+
+  - Lets create our dummy data using the rails console
+
+  ```Bash
+    rails c
+    Skill.create!(title: "Rails", percent_utilized: 75)
+    # Skill   = Table name
+    # .create = method
+    # !       = just in case we miss some field,
+    #           rails will throw an error
+
+    # (14.5ms)  BEGIN
+    #  Skill Create (4.5ms)  INSERT INTO "skills" ("title", "percent_utilized", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["title", # "Rails"], ["percent_utilized", 75], ["created_at", "2020-11-26 22:53:06.398554"], ["updated_at", "2020-11-26 22:53:06.398554"]]
+    #   (4.8ms)  COMMIT
+    => #<Skill id: 1, title: "Rails", percent_utilized: 75, created_at: "2020-11-26 22:53:06", updated_at: "2020-11-26 22:53:06">
+
+    Skill.create!(title: "HTML", percent_utilized: 5)
+    Skill.create!(title: "Angular", percent_utilized: 10)
+
+    Skill.all
+    # Skill Load (0.2ms)  SELECT "skills".* FROM "skills" LIMIT $1  [["LIMIT", 11]]
+    => #<ActiveRecord::Relation [#<Skill id: 1, title: "Rails", percent_utilized: 75, created_at: "2020-11-26 22:53:06", updated_at: "2020-11-26 22:53:06">, #<Skill id: 2, title: "HTML", percent_utilized: 5, created_at: "2020-11-26 22:55:56", updated_at: "2020-11-26 22:55:56">, #<Skill id: 3, title: "Angular", percent_utilized: 10, created_at: "2020-11-26 22:56:02", updated_at: "2020-11-26 22:56:02">]>
+  ```
