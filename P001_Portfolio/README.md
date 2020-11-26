@@ -8,10 +8,12 @@
     - [Clean Up](#clean-up)
     - [Controller Workflow](#controller-workflow)
     - [Controllers](#controllers)
-      - [Generate Pages](#generate-pages)
+      - [Controller Generator](#controller-generator)
     - [Model](#model)
       - [Model Generator](#model-generator)
       - [Rails Console](#rails-console)
+    - [Resource](#resource)
+      - [Resource Generator](#resource-generator)
 
 # PROJECT 001 - PORTFOLIO
 
@@ -336,7 +338,7 @@
   - Capitalize the name
   - Plural verb
 
-#### Generate Pages
+#### Controller Generator
 
 [Go Back to Contents](#contents)
 
@@ -420,4 +422,47 @@
     Skill.all
     # Skill Load (0.2ms)  SELECT "skills".* FROM "skills" LIMIT $1  [["LIMIT", 11]]
     => #<ActiveRecord::Relation [#<Skill id: 1, title: "Rails", percent_utilized: 75, created_at: "2020-11-26 22:53:06", updated_at: "2020-11-26 22:53:06">, #<Skill id: 2, title: "HTML", percent_utilized: 5, created_at: "2020-11-26 22:55:56", updated_at: "2020-11-26 22:55:56">, #<Skill id: 3, title: "Angular", percent_utilized: 10, created_at: "2020-11-26 22:56:02", updated_at: "2020-11-26 22:56:02">]>
+  ```
+
+### Resource
+
+[Go Back to Contents](#contents)
+
+- The good practices when we are generating a new resource is to:
+  - Capitalize the name
+  - Singular verb
+- The idea of **resources**, they are skinny **scaffold**, because the they generate:
+  - Empty controllers (just the basic class)
+  - Empty models (just the basic class)
+  - Empty view
+- The resource generator will add a new **resources** to our `routes.rb` with all CRUD operation available
+
+#### Resource Generator
+
+[Go Back to Contents](#contents)
+
+- On `Terminal`
+
+  ```Bash
+    rails g resource Portfolio title:string subtitle:string body:text main_image:text thumb_image:text
+    # Running via Spring preloader in process 41991
+    # invoke  active_record
+    # create    db/migrate/20201126231053_create_portfolios.rb
+    # create    app/models/portfolio.rb
+    # invoke  controller
+    # create    app/controllers/portfolios_controller.rb
+    # invoke    erb
+    # create      app/views/portfolios
+    # invoke    helper
+    # create      app/helpers/portfolios_helper.rb
+    # invoke    assets
+    # invoke      scss
+    # create        app/assets/stylesheets/portfolios.scss
+    # invoke  resource_route
+    #  route    resources :portfolios
+    rails db:migrate
+    # == 20201126231053 CreatePortfolios: migrating =================================
+    # -- create_table(:portfolios)
+    #    -> 0.0279s
+    # == 20201126231053 CreatePortfolios: migrated (0.0280s) ========================
   ```
