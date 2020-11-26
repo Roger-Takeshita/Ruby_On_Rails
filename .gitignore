@@ -173,10 +173,11 @@ env.json
 # Ruby on Rails #
 #################
 **/tmp
+**/public/packs/
+**/config/master.key
 
 # Roger-That #
 ##############
 downloads/
 roger-that/
 roger-that.md
-
