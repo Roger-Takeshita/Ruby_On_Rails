@@ -18,12 +18,16 @@
     - [Customizations](#customizations)
       - [Customizing Generator](#customizing-generator)
       - [Customizing Templates](#customizing-templates)
+    - [Dataflow](#dataflow)
+      - [Seeds File](#seeds-file)
 
 # LINKS
 
 [Go Back to Contents](#contents)
 
 - [Rails Scaffold Templates](https://github.com/rails/rails/tree/master/railties/lib/rails/generators/erb/scaffold/templates)
+- [Faker](https://github.com/faker-ruby/faker)
+- [Image Generator](https://placeholder.com/)
 
 # PROJECT 001 - PORTFOLIO
 
@@ -551,3 +555,59 @@
     <br>
     <%%= link_to 'New <%= singular_table_name.titleize %>', new_<%= singular_route_name %>_path %>
   ```
+
+### Dataflow
+
+[Go Back to Contents](#contents)
+
+#### Seeds File
+
+[Go Back to Contents](#contents)
+
+- We are going to install **Faker** library to seed our database with dummy data
+- [https://github.com/faker-ruby/faker](https://github.com/faker-ruby/faker)
+
+- In `db/seeds.rb`
+
+  ```Ruby
+    10.times do |blog|
+      Blog.create!(
+        title: "My Blog Post #{blog}",
+        body: Faker::Lorem.paragraph
+      )
+    end
+
+    puts "10 blog posts created"
+
+    5.times do |skill|
+      Skill.create!(
+        title: "Rails #{skill}",
+        percent_utilized: rand(0..100)
+      )
+    end
+
+    puts "5 skills created"
+
+    9.times do |portfolio_item|
+      Portfolio.create!(
+        title: "Portfolio title: #{portfolio_item}",
+        subtitle: Faker::Book.title,
+        body: Faker::Lorem.paragraph,
+        main_image: "https://via.placeholder.com/600x400",
+        thumb_image: "https://via.placeholder.com/350x200"
+      )
+    end
+
+    puts "9 portfolio items created"
+  ```
+
+  - On `Terminal`
+
+    ```Bash
+      rails db:setup
+      # Clean all data of our database (only for dev environment)
+
+      # 10 blog posts created
+      # 5 skills created
+      # 9 portfolio items created
+    ```
