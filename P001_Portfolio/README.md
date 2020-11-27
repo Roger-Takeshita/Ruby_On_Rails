@@ -21,6 +21,8 @@
     - [Dataflow](#dataflow)
       - [Seeds File](#seeds-file)
       - [Portfolio Controller](#portfolio-controller)
+        - [SHOW PORTFOLIOS](#show-portfolios)
+        - [NEW PORTFOLIO](#new-portfolio)
 
 # LINKS
 
@@ -211,7 +213,7 @@
 
       - the **new action** will render the form
 
-        ```Ruby
+        ```HTML
           <h1>New Blog</h1>
 
           <%= render 'form', blog: @blog %>
@@ -221,7 +223,7 @@
 
       - in `app/views/blogs/_form.html.erb`
 
-        ```Ruby
+        ```HTML
           <%= form_with(model: blog, local: true) do |form| %>
             <% if blog.errors.any? %>
               <div id="error_explanation">
@@ -537,7 +539,7 @@
 
 - In `lib/templates/erb/scaffold/index.html.erb`
 
-  ```Ruby
+  ```HTML
     <h2><%= plural_table_name.titleize %></h2>
     <p id="notice"><%%= notice %></p>
     <hr>
@@ -613,6 +615,8 @@
 
 #### Portfolio Controller
 
+##### SHOW PORTFOLIOS
+
 [Go Back to Contents](#contents)
 
 - In `app/controllers/portfolios_controller.rb`
@@ -622,17 +626,74 @@
       def index
         @portfolio_items = Portfolio.all
       end
+
+      def new
+        @portfolio_item = Portfolio.new
+      end
     end
   ```
 
 - In `app/views/portfolios/index.html.erb`
 
-  ```Ruby
+  ```HTML
     <h1>Portfolio Items</h1>
     <% @portfolio_items.each do |item| %>
       <p><%= item.title %></p>
       <p><%= item.subtitle %></p>
       <p><%= item.body %></p>
-      <p><%= image_tag item.thumb_image %></p>
+      <p><%= image_tag item.thumb_image if !item.thumb_image.nil? %></p>
+    <% end %>
+  ```
+
+##### NEW PORTFOLIO
+
+[Go Back to Contents](#contents)
+
+- In `app/controllers/portfolios_controller.rb`
+
+  ```Ruby
+    class PortfoliosController < ApplicationController
+      def index
+        @portfolio_items = Portfolio.all
+      end
+
+      def new
+        @portfolio_item = Portfolio.new
+      end
+
+      def create
+        @portfolio_item = Portfolio.create(params.require(:portfolio).permit(:title, :subtitle, :body))
+
+        respond_to do |format|
+          if @portfolio_item.save
+            format.html { redirect_to portfolios_path, notice: "Your portfolio has been created" }
+          else
+            format.html { render :new }
+          end
+        end
+      end
+    end
+  ```
+
+- In `app/views/portfolios/new.html.erb`
+
+  ```HTML
+    <h1>Create a new Portfolio Item</h1>
+    <%= form_for(@portfolio_item) do |form| %>
+      <div class="field">
+        <%= form.label :title %>
+        <%= form.text_field :title %>
+      </div>
+      <div class="field">
+        <%= form.label :subtitle %>
+        <%= form.text_field :subtitle %>
+      </div>
+      <div class="field">
+        <%= form.label :body %>
+        <%= form.text_area :body %>
+      </div>
+      <div class="actions">
+        <%= form.submit %>
+      </div>
     <% end %>
   ```
