@@ -1,7 +1,7 @@
 10.times do |blog|
   Blog.create!(
     title: "My Blog Post #{blog}",
-    body: Faker::Lorem.paragraph
+    body: Faker::Lorem.paragraph_by_chars
   )
 end
 
@@ -20,7 +20,7 @@ puts "5 skills created"
   Portfolio.create!(
     title: "Portfolio title: #{portfolio_item}",
     subtitle: Faker::Book.title,
-    body: Faker::Lorem.paragraph,
+    body: Faker::Lorem.paragraph_by_chars,
     main_image: "https://via.placeholder.com/600x400",
     thumb_image: "https://via.placeholder.com/350x200"
   )

@@ -20,6 +20,7 @@
       - [Customizing Templates](#customizing-templates)
     - [Dataflow](#dataflow)
       - [Seeds File](#seeds-file)
+      - [Portfolio Controller](#portfolio-controller)
 
 # LINKS
 
@@ -558,8 +559,6 @@
 
 ### Dataflow
 
-[Go Back to Contents](#contents)
-
 #### Seeds File
 
 [Go Back to Contents](#contents)
@@ -573,7 +572,7 @@
     10.times do |blog|
       Blog.create!(
         title: "My Blog Post #{blog}",
-        body: Faker::Lorem.paragraph
+        body: Faker::Lorem.paragraph_by_chars
       )
     end
 
@@ -592,7 +591,7 @@
       Portfolio.create!(
         title: "Portfolio title: #{portfolio_item}",
         subtitle: Faker::Book.title,
-        body: Faker::Lorem.paragraph,
+        body: Faker::Lorem.paragraph_by_chars,
         main_image: "https://via.placeholder.com/600x400",
         thumb_image: "https://via.placeholder.com/350x200"
       )
@@ -611,3 +610,29 @@
       # 5 skills created
       # 9 portfolio items created
     ```
+
+#### Portfolio Controller
+
+[Go Back to Contents](#contents)
+
+- In `app/controllers/portfolios_controller.rb`
+
+  ```Ruby
+    class PortfoliosController < ApplicationController
+      def index
+        @portfolio_items = Portfolio.all
+      end
+    end
+  ```
+
+- In `app/views/portfolios/index.html.erb`
+
+  ```Ruby
+    <h1>Portfolio Items</h1>
+    <% @portfolio_items.each do |item| %>
+      <p><%= item.title %></p>
+      <p><%= item.subtitle %></p>
+      <p><%= item.body %></p>
+      <p><%= image_tag item.thumb_image %></p>
+    <% end %>
+  ```
