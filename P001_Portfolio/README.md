@@ -1,5 +1,6 @@
 <h1 id='contents'>Table of Contents</h1>
 
+- [LINKS](#links)
 - [PROJECT 001 - PORTFOLIO](#project-001---portfolio)
   - [Start New Project](#start-new-project)
     - [Start Server](#start-server)
@@ -14,6 +15,15 @@
       - [Rails Console](#rails-console)
     - [Resource](#resource)
       - [Resource Generator](#resource-generator)
+    - [Customizations](#customizations)
+      - [Customizing Generator](#customizing-generator)
+      - [Customizing Templates](#customizing-templates)
+
+# LINKS
+
+[Go Back to Contents](#contents)
+
+- [Rails Scaffold Templates](https://github.com/rails/rails/tree/master/railties/lib/rails/generators/erb/scaffold/templates)
 
 # PROJECT 001 - PORTFOLIO
 
@@ -465,4 +475,79 @@
     # -- create_table(:portfolios)
     #    -> 0.0279s
     # == 20201126231053 CreatePortfolios: migrated (0.0280s) ========================
+  ```
+
+### Customizations
+
+#### Customizing Generator
+
+[Go Back to Contents](#contents)
+
+- After generating a new app, we can delete our initial css
+
+  ```Bash
+    rm app/assets/stylesheets/scaffolds.scss
+  ```
+
+- In `config/application.rb`
+
+  - This is our main application file system
+  - Here we can add custom properties
+  - For example we could change the **generators** configuration
+
+    ```Ruby
+      module P001Portfolio
+        class Application < Rails::Application
+          config.load_defaults 6.0
+
+          config.generators do |g|
+          g.orm             :active_record
+          # use default standard communication to the database
+          g.template_engine :erb
+          # use erb as template engine (similar to jsx)
+          g.test_framework  :test_unit, fixture: false
+          # use test_unit as default tester
+          g.stylesheets     false
+          # don't generate stylesheets
+          g.javascript      false
+          # don't generate javascript
+
+          config.generators.system_tests = nil
+        end
+      end
+    ```
+
+#### Customizing Templates
+
+[Go Back to Contents](#contents)
+
+- Create a new folder and files
+
+  ```Bash
+    touch lib/templates/erb/scaffold/index.html.erb
+  ```
+
+- We can use the rails original code to use as template to create our own version
+- [Rails Scaffold Templates](https://github.com/rails/rails/tree/master/railties/lib/rails/generators/erb/scaffold/templates)
+
+- In `lib/templates/erb/scaffold/index.html.erb`
+
+  ```Ruby
+    <h2><%= plural_table_name.titleize %></h2>
+    <p id="notice"><%%= notice %></p>
+    <hr>
+    <div>
+      <%% @<%= plural_table_name %>.each do |<%= singular_table_name %>| %>
+      <div>
+        <% attributes.reject(&:password_digest?).each do |attribute| -%>
+          <p><%%= <%= singular_table_name %>.<%= attribute.column_name %> %></p>
+        <% end -%>
+        <p><%%= link_to 'Show', <%= model_resource_name %> %></p>
+        <p><%%= link_to 'Edit', edit_<%= singular_route_name %>_path(<%= singular_table_name %>) %></p>
+        <p><%%= link_to 'Destroy', <%= model_resource_name %>, method: :delete, data: { confirm: 'Are you sure?' } %></p>
+      </div>
+      <%% end %>
+    </div>
+    <br>
+    <%%= link_to 'New <%= singular_table_name.titleize %>', new_<%= singular_route_name %>_path %>
   ```
