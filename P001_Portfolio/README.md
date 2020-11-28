@@ -23,6 +23,7 @@
       - [Portfolio Controller](#portfolio-controller)
         - [SHOW PORTFOLIOS](#show-portfolios)
         - [NEW PORTFOLIO](#new-portfolio)
+        - [EDIT PORTFOLIO](#edit-portfolio)
 
 # LINKS
 
@@ -615,6 +616,8 @@
 
 #### Portfolio Controller
 
+---
+
 ##### SHOW PORTFOLIOS
 
 [Go Back to Contents](#contents)
@@ -644,6 +647,8 @@
       <p><%= image_tag item.thumb_image if !item.thumb_image.nil? %></p>
     <% end %>
   ```
+
+---
 
 ##### NEW PORTFOLIO
 
@@ -679,6 +684,74 @@
 
   ```HTML
     <h1>Create a new Portfolio Item</h1>
+    <%= form_for(@portfolio_item) do |form| %>
+      <div class="field">
+        <%= form.label :title %>
+        <%= form.text_field :title %>
+      </div>
+      <div class="field">
+        <%= form.label :subtitle %>
+        <%= form.text_field :subtitle %>
+      </div>
+      <div class="field">
+        <%= form.label :body %>
+        <%= form.text_area :body %>
+      </div>
+      <div class="actions">
+        <%= form.submit %>
+      </div>
+    <% end %>
+  ```
+
+---
+
+##### EDIT PORTFOLIO
+
+[Go Back to Contents](#contents)
+
+- In `app/controllers/portfolios_controller.rb`
+
+  ```Ruby
+    class PortfoliosController < ApplicationController
+      def index
+        @portfolio_items = Portfolio.all
+      end
+
+      def new
+        @portfolio_item = Portfolio.new
+      end
+
+      def create
+        @portfolio_item = Portfolio.create(params.require(:portfolio).permit(:title, :subtitle, :body))
+
+        respond_to do |format|
+          if @portfolio_item.save
+            format.html { redirect_to portfolios_path, notice: "Your portfolio has been created" }
+          else
+            format.html { render :new }
+          end
+        end
+      end
+
+      def edit
+        @portfolio_item = Portfolio.find(params[:id])
+      end
+
+      def update
+        @portfolio_item = Portfolio.find(params[:id])
+        respond_to do |format|
+          if @portfolio_item.update(params.require(:portfolio).permit(:title, :subtitle, :body))
+            format.html { redirect_to portfolios_path, notice: "Your portfolio has updated" }
+          end
+        end
+      end
+    end
+  ```
+
+- In `app/views/portfolios/edit.html.erb`
+
+  ```HTML
+    <h1>Edit this Portfolio Item</h1>
     <%= form_for(@portfolio_item) do |form| %>
       <div class="field">
         <%= form.label :title %>
