@@ -24,6 +24,10 @@
         - [SHOW PORTFOLIOS](#show-portfolios)
         - [NEW PORTFOLIO](#new-portfolio)
         - [EDIT PORTFOLIO](#edit-portfolio)
+        - [PORTFOLIO ROUTES](#portfolio-routes)
+        - [LINKS](#links-1)
+        - [EDIT](#edit)
+        - [SHOW](#show)
 
 # LINKS
 
@@ -770,3 +774,71 @@
       </div>
     <% end %>
   ```
+
+---
+
+##### PORTFOLIO ROUTES
+
+[Go Back to Contents](#contents)
+
+- On `Terminal`
+
+  - We can check the available routes
+
+    ```Bash
+      rake routes | grep portfolio
+    ```
+
+    ![](https://i.imgur.com/Pkrl4PZ.png)
+
+---
+
+##### LINKS
+
+[Go Back to Contents](#contents)
+
+- We have 3 different ways to redirect a different page
+
+  - Using a hard coded path
+
+    ```HTML
+      <a href="portfolios/new">Create New Item</a>
+    ```
+
+  - Using **path** (relative path)
+
+    ```HTML
+      <%= link_to "Create New Item", new_portfolio_path %>
+      <!-- /portfolios/new -->
+    ```
+
+  - Using **url** (absolute path)
+
+    ```HTML
+      <%= link_to "Create New Item", new_portfolio_url %>
+      <!-- http://localhost:3000/portfolios/new -->
+    ```
+
+  - finding the right **path**
+
+    ![](https://i.imgur.com/ZCY7HyA.png)
+
+---
+
+##### EDIT
+
+[Go Back to Contents](#contents)
+
+- We can send the data though our `html.erb`
+
+  ```HTML
+    <%= link_to "Edit", edit_portfolio_path(item.id) %>
+  ```
+
+  - in this case we are using the `edit_portfolio_path` and sending the `item.id`, so rails understands that it needs to populate the fields
+
+---
+
+##### SHOW
+
+[Go Back to Contents](#contents)
