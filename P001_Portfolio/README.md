@@ -842,3 +842,52 @@
 ##### SHOW
 
 [Go Back to Contents](#contents)
+
+- Create the show page
+
+  ```Bash
+    touch app/views/portfolios/show.html.erb
+  ```
+
+- In `app/views/portfolios/show.html.erb`
+
+  - We can inspect the `@portfolio_item` variable that we created and we are passing to our template
+
+    ```HTML
+      <%= @portfolio_item.inspect %>
+    ```
+
+    ```HTML
+      <%= image_tag @portfolio_item.main_image %>
+
+      <h1><%= @portfolio_item.title %></h1>
+
+      <em><%= @portfolio_item.subtitle %></em>
+
+      <p><%= @portfolio_item.body %></p>
+    ```
+
+- In `app/views/portfolios/index.html.erb`
+
+  - Create a link to show individual portfolio, we can create an `<a>` tag using `link_to`
+  - `item.title` will be the displayed in the `<a>` tag
+  - Then we need to add a `,` (comma) followed by the path. Similar to `Edit` path, we can do the same to the show path. The only difference is that we don't need to specify anything in front of the path. `portfolio_path(item.id)`
+    - Because rails knows that we are going to pass the `.id` to go to the show/edit page. We don't necessarily pass `item.id` we could pass just `item`
+
+  ```HTML
+    <p><%= link_to item.title, portfolio_path(item.id) %></p>
+  ```
+
+  ```HTML
+    <h1>Portfolio Items</h1>
+    <%= link_to "Create New Item", new_portfolio_path %>
+    <p><%= new_portfolio_path %></p>
+    <p><%= new_portfolio_url %></p>
+    <% @portfolio_items.each do |item| %>
+      <p><%= link_to item.title, portfolio_path(item) %></p>
+      <p><%= item.subtitle %></p>
+      <p><%= item.body %></p>
+      <p><%= image_tag item.thumb_image if !item.thumb_image.nil? %></p>
+      <%= link_to "Edit", edit_portfolio_path(item) %>
+    <% end %>
+  ```
