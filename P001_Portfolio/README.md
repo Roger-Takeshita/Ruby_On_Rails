@@ -28,6 +28,7 @@
         - [LINKS](#links-1)
         - [EDIT](#edit)
         - [SHOW](#show)
+        - [DESTROY](#destroy)
 
 # LINKS
 
@@ -889,5 +890,97 @@
       <p><%= item.body %></p>
       <p><%= image_tag item.thumb_image if !item.thumb_image.nil? %></p>
       <%= link_to "Edit", edit_portfolio_path(item) %>
+    <% end %>
+  ```
+
+---
+
+##### DESTROY
+
+[Go Back to Contents](#contents)
+
+- Using the `rails c` console
+
+  ```Bash
+    rails c
+    # Running via Spring preloader in process 49011
+    # Loading development environment (Rails 6.0.3.4)
+
+    portfolio = Portfolio.last
+    # Portfolio Load (0.4ms)  SELECT "portfolios".* FROM "portfolios" ORDER BY "portfolios"."id" DESC LIMIT $1  [["LIMIT", 1]]
+
+    portfolio
+    # => #<Portfolio id: 9, title: "Portfolio title: 8", subtitle: "For a Breath I Tarry", body: "Tenetur eum vel. Quia et maxime. Reprehenderit adi...", main_image: "https://via.placeholder.com/600x400", thumb_image: "https://via.placeholder.com/350x200", created_at: "2020-11-30 20:08:02", updated_at: "2020-11-30 20:08:02">
+
+    portfolio.delete
+    # Portfolio Destroy (4.4ms)  DELETE FROM "portfolios" WHERE "portfolios"."id" = $1  [["id", 9]]
+    # => #<Portfolio id: 9, title: "Portfolio title: 8", subtitle: "For a Breath I Tarry", body: "Tenetur eum vel. Quia et maxime. Reprehenderit adi...", main_image: "https://via.placeholder.com/600x400", thumb_image: "https://via.placeholder.com/350x200", created_at: "2020-11-30 20:08:02", updated_at: "2020-11-30 20:08:02">
+
+    portfolio_two = Portfolio.last
+    # Portfolio Load (0.3ms)  SELECT "portfolios".* FROM "portfolios" ORDER BY "portfolios"."id" DESC LIMIT $1  [["LIMIT", 1]]
+
+    portfolio_two
+    # => #<Portfolio id: 8, title: "Portfolio title: 7", subtitle: "The Wings of the Dove", body: "Voluptas debitis perspiciatis. Ipsa mollitia inven...", main_image: "https://via.placeholder.com/600x400", thumb_image: "https://via.placeholder.com/350x200", created_at: "2020-11-30 20:08:02", updated_at: "2020-11-30 20:08:02">
+
+    portfolio_two.destroy
+    # (9.2ms)  BEGIN
+    #  Portfolio Destroy (0.3ms)  DELETE FROM "portfolios" WHERE "portfolios"."id" = $1  [["id", 8]]
+    # (0.5ms)  COMMIT
+    # => #<Portfolio id: 8, title: "Portfolio title: 7", subtitle: "The Wings of the Dove", body: "Voluptas debitis perspiciatis. Ipsa mollitia inven...", main_image: "https://via.placeholder.com/600x400", thumb_image: "https://via.placeholder.com/350x200", created_at: "2020-11-30 20:08:02", updated_at: "2020-11-30 20:08:02">
+  ```
+
+- Difference between `delete` and `destroy`:
+
+  - `Delete` and `Destroy`, Deletes the record in the database and freezes this instance to reflect that no changes should be made (since they can't be persisted).
+  - With **Destroy**, there's a series of `callbacks` associated with destroy. If the `before_destroy` callback throws `:abort` the action is cancelled and destroy returns `false`.
+  - With destroy, If I try to delete some record, but in other part of my code, we want to protect this record, this will throw an error
+
+- With destroy action, we don't need to create a view because destroy only deletes the record and redirect to another page
+- In `app/controllers/portfolios_controller.rb`
+
+  - Let's create our `destroy` action
+
+    ```Ruby
+      def destroy
+        # Perform lookup
+        @portfolio_item = Portfolio.find(params[:id])
+
+        # Destroy/delete the record
+        @portfolio_item.destroy
+
+        # Redirect
+        respond_to do |format|
+          format.html { redirect_to portfolios_url, notice: 'Your portfolio has been deleted' }
+        end
+      end
+    ```
+
+- In `app/views/portfolios/index.html.erb`
+
+  ```HTML
+    <%= link_to 'Delete Portfolio Item', portfolio_path(portfolio_item), method: :delete, data: {confirm: 'Are you sure?'} %>
+  ```
+
+  - `link_to` = `<a>` tag
+  - `'Delete Portfolio'` = `<a>` tag text
+  - `portfolio_path(portfolio_item)` = regular path, we could user a syntax sugar and use just `portfolio`
+  - `method: :delete` = This tells our system that we want to delete this record
+  - `data: {confirm: 'Are you sure?'}` = a little bit of JavaScript that will popup a confirmation window
+
+  ```HTML
+    <h1>Portfolio Items</h1>
+
+    <%= link_to "Create New Item", new_portfolio_path %>
+
+    <p><%= new_portfolio_path %></p>
+    <p><%= new_portfolio_url %></p>
+
+    <% @portfolio_items.each do |portfolio_item| %>
+      <p><%= link_to portfolio_item.title, portfolio_path(portfolio_item) %></p>
+      <p><%= portfolio_item.subtitle %></p>
+      <p><%= portfolio_item.body %></p>
+      <p><%= image_tag portfolio_item.thumb_image if !portfolio_item.thumb_image.nil? %></p>
+      <%= link_to "Edit", edit_portfolio_path(portfolio_item) %>
+      <%= link_to 'Delete Portfolio Item', portfolio_path(portfolio_item), method: :delete, data: {confirm: 'Are you sure?'} %>
     <% end %>
   ```

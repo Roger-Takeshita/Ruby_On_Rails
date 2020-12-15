@@ -12,7 +12,7 @@ class PortfoliosController < ApplicationController
 
     respond_to do |format|
       if @portfolio_item.save
-        format.html { redirect_to portfolios_path, notice: "Your portfolio has been created" }
+        format.html { redirect_to portfolios_path, notice: 'Your portfolio has been created' }
       else
         format.html { render :new }
       end
@@ -27,12 +27,25 @@ class PortfoliosController < ApplicationController
     @portfolio_item = Portfolio.find(params[:id])
     respond_to do |format|
       if @portfolio_item.update(params.require(:portfolio).permit(:title, :subtitle, :body))
-        format.html { redirect_to portfolios_path, notice: "Your portfolio has updated" }
+        format.html { redirect_to portfolios_path, notice: 'Your portfolio has updated' }
       end
     end
   end
 
   def show
     @portfolio_item = Portfolio.find(params[:id])
+  end
+
+  def destroy
+    # Perform lookup
+    @portfolio_item = Portfolio.find(params[:id])
+
+    # Destroy/delete the record
+    @portfolio_item.destroy
+
+    # Redirect
+    respond_to do |format|
+      format.html { redirect_to portfolios_url, notice: 'Your portfolio has been deleted' }
+    end
   end
 end
