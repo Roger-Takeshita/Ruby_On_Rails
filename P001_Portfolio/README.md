@@ -29,6 +29,8 @@
         - [EDIT](#edit)
         - [SHOW](#show)
         - [DESTROY](#destroy)
+      - [Routes](#routes-1)
+        - [MAPPING ROUTES](#mapping-routes)
 
 # LINKS
 
@@ -984,3 +986,77 @@
       <%= link_to 'Delete Portfolio Item', portfolio_path(portfolio_item), method: :delete, data: {confirm: 'Are you sure?'} %>
     <% end %>
   ```
+
+#### Routes
+
+[Go Back to Contents](#contents)
+
+- By default rails creates a route `pages/home` that is our first page (landing page)
+- This is not very intuitive, so we can define the root route of application
+- **NOTE** every time we change the `route.rb` file, we need to restart the server
+
+- In `config/routes.rb`
+
+  - Instead of using:
+
+    ```Ruby
+      Rails.application.routes.draw do
+        resources :portfolios
+        get 'pages/home'
+        get 'pages/about'
+        get 'pages/contact'
+        resources :blogs
+      end
+    ```
+
+  - We can define the root route of our app
+
+    - In this case we are pointer to our `pages_controller.rb` (controller) and defining the `home` action
+
+    ```Ruby
+      Rails.application.routes.draw do
+        resources :portfolios
+        get 'pages/about'
+        get 'pages/contact'
+        resources :blogs
+
+        root to: 'pages#home'
+      end
+    ```
+
+##### MAPPING ROUTES
+
+[Go Back to Contents](#contents)
+
+- To render the about page we could navigate through [http://localhost:3000/pages/about](http://localhost:3000/pages/about)
+- But this is not very intuitive, since we need to add `/pages/about`, because our root is pointing this way (`get 'pages/about'`)
+- We can change the path of our page and point to any route we want
+
+  - How rails works, if we don't specify `to:` rails understands that `pages/contact` the left side (`pages`) is the controllers and the right side is (`contact`) is the action
+
+  ```Ruby
+    Rails.application.routes.draw do
+      resources :portfolios
+      # get 'pages/about'
+      get 'about', to: 'pages#about'
+      # get 'pages/contact'
+      get 'contact', to: 'pages#contact'
+      resources :blogs
+
+      root to: 'pages#home'
+    end
+  ```
+
+  ![](https://i.imgur.com/2ebve2W.png)
+
+  ![](https://i.imgur.com/tDxWz5j.png)
+
+- We can check if our changes worked
+
+  ```Bash
+    rake routes
+  ```
+
+  - Or through the browser [http://localhost:3000/rails/info/routes](http://localhost:3000/rails/info/routes)
+
+    ![](https://i.imgur.com/BIEeT9L.png)
