@@ -31,6 +31,7 @@
         - [DESTROY](#destroy)
       - [Routes](#routes-1)
         - [MAPPING ROUTES](#mapping-routes)
+        - [RESOURCES ROUTES](#resources-routes)
 
 # LINKS
 
@@ -1060,3 +1061,56 @@
   - Or through the browser [http://localhost:3000/rails/info/routes](http://localhost:3000/rails/info/routes)
 
     ![](https://i.imgur.com/BIEeT9L.png)
+
+##### RESOURCES ROUTES
+
+[Go Back to Contents](#contents)
+
+- With resources, rails automatically creates all the CRUD routes for us
+
+  ![](https://i.imgur.com/nrBjTee.png)
+
+- The problem with that, it's that we will get a route called `/portfolios/:id` to get a single portfolio. We can change this pattern to `/portfolio/:id` (singular)
+- To do so, we can add an `except:` method, the `except:` method accepts an array where we can define the actions that we want to override.
+
+  ```Ruby
+    resources :portfolios, except: [:show]
+  ```
+
+  ![](https://i.imgur.com/eO1hACd.png)
+
+- but if we try to access like this using the `<a>` that that we added before
+
+  ```HTML
+    <p><%= link_to portfolio_item.title, portfolio_path(portfolio_item) %></p>
+  ```
+
+  - This won't work, because rails will try to access `portfolios/:id` because we are using the default helper `portfolio_path()`
+  - To fix this problem we can create our own custom helper (path)
+
+    ```Ruby
+      get 'portfolio/:id', to: 'portfolios#show', as: 'portfolio_show'
+    ```
+
+    ![](https://i.imgur.com/pXGjc1b.png)
+
+- Then we just need to update our template to map to `portfolio_show_path()`
+- In `app/views/portfolios/index.html.erb`
+
+  ```Ruby
+    <h1>Portfolio Items</h1>
+
+    <%= link_to "Create New Item", new_portfolio_path %>
+
+    <p><%= new_portfolio_path %></p>
+    <p><%= new_portfolio_url %></p>
+
+    <% @portfolio_items.each do |portfolio_item| %>
+      <p><%= link_to portfolio_item.title, portfolio_show_path(portfolio_item) %></p>
+      <p><%= portfolio_item.subtitle %></p>
+      <p><%= portfolio_item.body %></p>
+      <p><%= image_tag portfolio_item.thumb_image if !portfolio_item.thumb_image.nil? %></p>
+      <%= link_to "Edit", edit_portfolio_path(portfolio_item) %>
+      <%= link_to 'Delete Portfolio Item', portfolio_path(portfolio_item), method: :delete, data: {confirm: 'Are you sure?'} %>
+    <% end %>
+  ```
