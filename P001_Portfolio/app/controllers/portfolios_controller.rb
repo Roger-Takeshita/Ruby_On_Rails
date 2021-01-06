@@ -8,11 +8,15 @@ class PortfoliosController < ApplicationController
   end
 
   def create
-    @portfolio_item = Portfolio.create(params.require(:portfolio).permit(:title, :subtitle, :body))
+    @portfolio_item = Portfolio.create(params.require(:portfolio).permit(
+                                         :title, :subtitle, :body
+                                       ))
 
     respond_to do |format|
       if @portfolio_item.save
-        format.html { redirect_to portfolios_path, notice: 'Your portfolio has been created' }
+        format.html {
+          redirect_to portfolios_path, notice: 'Your portfolio has been created'
+        }
       else
         format.html { render :new }
       end
@@ -26,8 +30,15 @@ class PortfoliosController < ApplicationController
   def update
     @portfolio_item = Portfolio.find(params[:id])
     respond_to do |format|
-      if @portfolio_item.update(params.require(:portfolio).permit(:title, :subtitle, :body))
-        format.html { redirect_to portfolios_path, notice: 'Your portfolio has updated' }
+      if @portfolio_item.update(params.require(:portfolio).permit(
+                                  :title,
+                                  :subtitle,
+                                  :body
+                                ))
+
+        format.html {
+          redirect_to portfolios_path, notice: 'Your portfolio has updated'
+        }
       end
     end
   end
@@ -45,7 +56,9 @@ class PortfoliosController < ApplicationController
 
     # Redirect
     respond_to do |format|
-      format.html { redirect_to portfolios_url, notice: 'Your portfolio has been deleted' }
+      format.html {
+        redirect_to portfolios_url, notice: 'Your portfolio has been deleted'
+      }
     end
   end
 end

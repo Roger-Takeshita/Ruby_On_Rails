@@ -32,6 +32,7 @@
       - [Routes](#routes-1)
         - [MAPPING ROUTES](#mapping-routes)
         - [RESOURCES ROUTES](#resources-routes)
+        - [FRIENDLY ROUTES (SLUGS)](#friendly-routes-slugs)
 
 # LINKS
 
@@ -1114,3 +1115,144 @@
       <%= link_to 'Delete Portfolio Item', portfolio_path(portfolio_item), method: :delete, data: {confirm: 'Are you sure?'} %>
     <% end %>
   ```
+
+##### FRIENDLY ROUTES (SLUGS)
+
+[Go Back to Contents](#contents)
+
+- We can use friendly routes (slugs) instead of `:id`. In to do so we are going to install a gem called [friendly_id](https://rubygems.org/gems/friendly_id) - [Repo](https://github.com/norman/friendly_id)
+- After installing (bundle install) the gem
+- Run
+
+  ```Bash
+    rails generate friendly_id
+    # Running via Spring preloader in process 16839
+    #   create  db/migrate/20201216050613_create_friendly_id_slugs.rb
+    #   create  config/initializers/friendly_id.rb
+    rails db:migrate
+    # == 20201216050613 CreateFriendlyIdSlugs: migrating ============================
+    # -- create_table(:friendly_id_slugs)
+    #    -> 0.0508s
+    # -- add_index(:friendly_id_slugs, [:sluggable_type, :sluggable_id])
+    #    -> 0.0053s
+    # -- add_index(:friendly_id_slugs, [:slug, :sluggable_type], {:length=>{:slug=>140, :sluggable_type=>50}})
+    #    -> 0.0033s
+    # -- add_index(:friendly_id_slugs, [:slug, :sluggable_type, :scope], {:length=>{:slug=>70, :sluggable_type=>50, :scope=>70}, :unique=>true})
+    #    -> 0.0028s
+    # == 20201216050613 CreateFriendlyIdSlugs: migrated (0.0624s) ===================
+  ```
+
+- Generate the migration
+
+  ```Bash
+    rails g migration add_slug_to_blogs slug:string:uniq
+
+    #                      ^              ^     ^    ^
+    #                      |              |     |    |
+    #                      |              |     |    └── optional (in this case has to be unique)
+    #                      |              |     |
+    #                      |              |     └── datatype
+    #                      |              |
+    #                      |              └── field/property
+    #                      |
+    #                      └── very import the way we write, it has some key words like "add"
+  ```
+
+- After running the migration this will create a a new migration file
+- In `db/migrate/20210106012213_add_slug_to_blogs.rb`
+
+  ```Ruby
+    class AddSlugToBlogs < ActiveRecord::Migration[6.0]
+      def change
+        add_column :blogs, :slug, :string
+        add_index :blogs, :slug, unique: true
+      end
+    end
+  ```
+
+  - As we can see the because we added the `add` word and `blogs` word in our migration
+  - Rails knows that it needs to create a new column in the `blogs` table (`add_column :blogs, :slug, :string`)
+  - And also, it has to be unique (`add_index :blogs, :slug, unique: true`)
+
+- After we `rails db:migrate` to update our schema file
+
+  - Now we can see that rails created the `friendly_id_slugs` table
+  - And also added a new column/field to our `blogs` tables called `slug`
+
+    ```Ruby
+      create_table "blogs", force: :cascade do |t|
+        t.string "title"
+        t.text "body"
+        t.datetime "created_at", precision: 6, null: false
+        t.datetime "updated_at", precision: 6, null: false
+        t.string "slug"
+        t.index ["slug"], name: "index_blogs_on_slug", unique: true
+      end
+
+      create_table "friendly_id_slugs", force: :cascade do |t|
+        t.string "slug", null: false
+        t.integer "sluggable_id", null: false
+        t.string "sluggable_type", limit: 50
+        t.string "scope"
+        t.datetime "created_at"
+        t.index ["slug", "sluggable_type", "scope"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type_and_scope", unique: true
+        t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
+        t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
+      end
+    ```
+
+- Using Rails console, we can test if everything went all right.
+
+  ```Bash
+    rails c
+
+    Blog.create!(title: "My greate title", body: "My bodyyyyy")
+    # (0.2ms)  BEGIN
+    #  Blog Exists? (0.5ms)  SELECT 1 AS one FROM "blogs" WHERE "blogs"."id" IS NOT NULL AND "blogs"."slug" = $1 LIMIT $2  [["slug", "my-greate-title"], ["LIMIT", 1]]
+    #  Blog Create (0.3ms)  INSERT INTO "blogs" ("title", "body", "created_at", "updated_at", "slug") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["title", "My greate # title"], ["body", "My bodyyyyy"], ["created_at", "2021-01-06 02:03:57.298855"], ["updated_at", "2021-01-06 02:03:57.298855"], ["slug", "my-greate-title"]]
+    #   (0.6ms)  COMMIT
+    # => #<Blog id: 11, title: "My greate title", body: "My bodyyyyy", created_at: "2021-01-06 02:03:57", updated_at: "2021-01-06 02:03:57", slug: "my-greate-title">
+  ```
+
+  - In the last line we can see that Rails automatically created a slug for us `slug: "my-greate-title"`
+
+- Update our **blog** look up method
+
+  - In `app/controllers/blogs_controller.rb`
+
+    - Update our `set_blog` method
+
+      ```Ruby
+        # From
+        def set_blog
+          @blog = Blog.find(params[:id])
+        end
+
+        # To
+        def set_blog
+          @blog = Blog.friendly.find(params[:id])
+        end
+      ```
+
+      - By adding `friendly` between `Blog` and `find`, this override the default behavior
+      - Before we were looking for `params[:id]`, in this case it was a **number**
+      - Now that we've overridden the default behavior, it's looking for a **string**
+      - Because we added the slugs column, our previous data doesn't have a slug (they have a nil value)
+
+        - To update the database
+        - we can run in our Rails console
+          - The way `friendly_id` works, every time we save the document, friendly_id recreates/updates the slug
+
+        ```Bash
+          rails c
+
+          Blog.find_each(&:save)
+          # Blog Load (0.2ms)  SELECT "blogs".* FROM "blogs" ORDER BY "blogs"."id" ASC LIMIT $1  [["LIMIT", 1000]]
+          # => nil
+
+          Blog.first
+          # Blog Load (16.4ms)  SELECT "blogs".* FROM "blogs" ORDER BY "blogs"."id" ASC LIMIT $1  [["LIMIT", 1]]
+          # => #<Blog id: 1, title: "My Blog Post 0", body: "Neque est vitae. Minus perspiciatis odit. Aperiam ...", created_at: "2021-01-06 01:59:46", updated_at: "2021-01-06 01:59:46", slug: "my-blog-post-0">
+        ```
+
+  ![](https://i.imgur.com/g8RDQSW.png)
