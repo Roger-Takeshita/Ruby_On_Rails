@@ -33,6 +33,7 @@
         - [MAPPING ROUTES](#mapping-routes)
         - [RESOURCES ROUTES](#resources-routes)
         - [FRIENDLY ROUTES (SLUGS)](#friendly-routes-slugs)
+      - [Enum](#enum)
 
 # LINKS
 
@@ -1256,3 +1257,104 @@
         ```
 
   ![](https://i.imgur.com/g8RDQSW.png)
+
+#### Enum
+
+[Go Back to Contents](#contents)
+
+- Let's create an Enum to set our blogs as `Draft` or `Published`
+- To do so, we need to create a new column in our `Blogs` table
+
+  - the `status` is going to be a number (`0` or `1`)
+
+  ```Bash
+    rails g migration add_post_status_to_blogs status:integer
+
+    # invoke active_record
+    # create    db/migrate/20210107033733_add_post_status_to_blogs.rb
+  ```
+
+- In `db/migrate/20210107033733_add_post_status_to_blogs.rb` we are going to define a default value for our status
+
+  - In the end of the `add_column` add `, default: 0`, this means that every new post will have a default value of `0`
+
+    ```Ruby
+      class AddPostStatusToBlogs < ActiveRecord::Migration[6.0]
+        def change
+          add_column :blogs, :status, :integer, default: 0
+        end
+      end
+
+    ```
+
+- Now we need to apply our modifications into our database
+
+  ```Bash
+    rails db:migrate
+  ```
+
+  - If we go to our schema (`db/schema.rb`) we can see that now we have a `status` column with a default value of `0`
+
+    ```Ruby
+      create_table "blogs", force: :cascade do |t|
+        t.string "title"
+        t.text "body"
+        t.datetime "created_at", precision: 6, null: false
+        t.datetime "updated_at", precision: 6, null: false
+        t.string "slug"
+        t.integer "status", default: 0
+        t.index ["slug"], name: "index_blogs_on_slug", unique: true
+      end
+    ```
+
+- In our `Blog` model (`app/models/blog.rb`), we are going to create the enum
+
+  - To create an Enum, we need to tell ruby that is the attribute is the enum, in our case is `status` and then we can pass a key/value pairs
+
+  ```Ruby
+    class Blog < ApplicationRecord
+      enum status: { draft: 0, published: 1 }
+
+      extend FriendlyId
+      friendly_id :title, use: :slugged
+    end
+  ```
+
+- Let's test using the rails console
+
+  ```Bash
+    rails c
+    Blog.create(title: "anything", body: "body anything")
+    #   (0.1ms)  BEGIN
+    #  Blog Exists? (0.8ms)  SELECT 1 AS one FROM "blogs" WHERE "blogs"."id" IS NOT NULL AND "blogs"."slug" = $1 LIMIT $2  [["slug", "anything"], ["LIMIT", 1]]
+    #  Blog Create (0.4ms)  INSERT INTO "blogs" ("title", "body", "created_at", "updated_at", "slug") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["title", "anything"], ["body", "body anything"], ["created_at", "2021-01-07 03:44:24.923081"], ["updated_at", "2021-01-07 03:44:24.923081"], ["slug", "anything"]]
+    #   (0.2ms)  COMMIT
+    # => #<Blog id: 1, title: "anything", body: "body anything", created_at: "2021-01-07 03:44:24", updated_at: "2021-01-07 03:44:24", slug: "anything", status: "draft">
+
+    Blog.last.published!
+    #  Blog Load (0.3ms)  SELECT "blogs".* FROM "blogs" ORDER BY "blogs"."id" DESC LIMIT $1  [["LIMIT", 1]]
+    #   (0.2ms)  BEGIN
+    #  Blog Update (0.5ms)  UPDATE "blogs" SET "status" = $1, "updated_at" = $2 WHERE "blogs"."id" = $3  [["status", 1], ["updated_at", "2021-01-07 03:45:08.368644"], ["id", 1]]
+    #   (0.5ms)  COMMIT
+    # => true
+
+    Blog.last
+    #  Blog Load (0.3ms)  SELECT "blogs".* FROM "blogs" ORDER BY "blogs"."id" DESC LIMIT $1  [["LIMIT", 1]]
+    # => #<Blog id: 1, title: "anything", body: "body anything", created_at: "2021-01-07 03:44:24", updated_at: "2021-01-07 03:45:08", slug: "anything", status: "published">
+
+    Blog.published
+    # Blog Load (0.4ms)  SELECT "blogs".* FROM "blogs" WHERE "blogs"."status" = $1 LIMIT $2  [["status", 1], ["LIMIT", 11]]
+    # => #<ActiveRecord::Relation [#<Blog id: 1, title: "anything", body: "body anything", created_at: "2021-01-07 03:44:24", updated_at: "2021-01-07 03:45:08", slug: "anything", status: "published">]>
+
+    Blog.published.count
+    #   (5.9ms)  SELECT COUNT(*) FROM "blogs" WHERE "blogs"."status" = $1  [["status", 1]]
+    # => 1
+
+    Blog.first.published!
+    # Blog Load (0.2ms)  SELECT "blogs".* FROM "blogs" ORDER BY "blogs"."id" ASC LIMIT $1  [["LIMIT", 1]]
+    # => true
+
+    Blog.published.count
+    # (13.2ms)  SELECT COUNT(*) FROM "blogs" WHERE "blogs"."status" = $1  [["status", 1]]
+    # => 2
+  ```
