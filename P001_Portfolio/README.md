@@ -33,7 +33,9 @@
         - [MAPPING ROUTES](#mapping-routes)
         - [RESOURCES ROUTES](#resources-routes)
         - [FRIENDLY ROUTES (SLUGS)](#friendly-routes-slugs)
+        - [CREATING CUSTOM ROUTES](#creating-custom-routes)
       - [Enum](#enum)
+    - [Debugging](#debugging)
 
 # LINKS
 
@@ -1258,6 +1260,110 @@
 
   ![](https://i.imgur.com/g8RDQSW.png)
 
+##### CREATING CUSTOM ROUTES
+
+[Go Back to Contents](#contents)
+
+- In `app/views/blogs/index.html.erb`
+
+  - We can create a link to our root's route using the `root_path`
+  - This link will only redirect to the root's page
+
+    ```HTML
+      <td><%= link_to blog.status, root_path %></td>
+    ```
+
+    ```HTML
+      <p id="notice"><%= notice %></p>
+      <h1>Blogs</h1>
+      <table>
+          <thead>
+              <tr>
+                  <th>Title</th>
+                  <th>Body</th>
+                  <th colspan="4"></th>
+              </tr>
+          </thead>
+          <tbody>
+              <% @blogs.each do |blog| %>
+                  <tr>
+                      <td><%= blog.title %></td>
+                      <td><%= blog.body %></td>
+                      <td><%= link_to blog.status, root_path %></td>
+                      <td><%= link_to 'Show', blog %></td>
+                      <td><%= link_to 'Edit', edit_blog_path(blog) %></td>
+                      <td><%= link_to 'Destroy', blog, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+                  </tr>
+              <% end %>
+          </tbody>
+      </table>
+      <br>
+      <%= link_to 'New Blog', new_blog_path %>
+    ```
+
+- To create a custom route, we need to:
+- In `config/routes.rb`
+
+  - We can create our custom route, inside a `do` block
+  - We can define a custom route `:toggle_status`
+
+  ```Ruby
+    resources :blogs do
+      member do
+        get :toggle_status
+      end
+    end
+  ```
+
+  ```Ruby
+    Rails.application.routes.draw do
+      resources :portfolios, except: [:show]
+      get 'portfolio/:id', to: 'portfolios#show', as: 'portfolio_show'
+
+      get 'about', to: 'pages#about'
+      get 'contact', to: 'pages#contact'
+      resources :blogs do
+        member do
+          get :toggle_status
+        end
+      end
+
+      root to: 'pages#home'
+    end
+  ```
+
+  ![](https://i.imgur.com/ufo7Vem.png)
+
+- In `app/views/blogs/index.html.erb`
+
+  - We now can update our link to use our custom route
+  - But only doing that, It won't work, because rails doesn't know that do do with this action
+
+    - As we can see in our `rake routes` we need to pass an `:id`, that's why we are passing `blog` (rails in the background understands that we are passing an id)
+      - `toggle_status_blog POST /blogs/:id/toggle_status(.:format) blogs#toggle_status`
+
+    ```HTML
+      <td><%= link_to blog.status, toggle_status_blog_path(blog) %></td>
+    ```
+
+- In `app/controllers/blogs_controller.rb`
+
+  - We need to create the `toggle_status` action
+  - First we need to add `toggle_status` action to our `before_action` array to enable this action
+
+    ```Ruby
+      def toggle_status
+        if @blog.draft?
+          @blog.published!
+        else
+          @blog.draft!
+        end
+
+        redirect_to blogs_url,
+                    notice: "Blogs status has been updated to #{@blog.status}"
+      end
+    ```
+
 #### Enum
 
 [Go Back to Contents](#contents)
@@ -1357,4 +1463,71 @@
     Blog.published.count
     # (13.2ms)  SELECT COUNT(*) FROM "blogs" WHERE "blogs"."status" = $1  [["status", 1]]
     # => 2
+
+    Blog.last.draft?
+    # Blog Load (0.3ms)  SELECT "blogs".* FROM "blogs" ORDER BY "blogs"."id" DESC LIMIT $1  [["LIMIT", 1]]
+    # => false
+
+    Blog.last.published?
+    # Blog Load (0.3ms)  SELECT "blogs".* FROM "blogs" ORDER BY "blogs"."id" DESC LIMIT $1  [["LIMIT", 1]]
+    # => true
   ```
+
+### Debugging
+
+[Go Back to Contents](#contents)
+
+- Because we installed the `buybug` in our `Gemfile`
+
+  ```Bash
+    group :development, :test do
+      # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+      gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+    end
+  ```
+
+- We can use `byebug` to stop the running code and debug the server
+- We just need to add `byebug`
+
+  ```Ruby
+    def toggle_status
+      byebug
+      redirect_to blogs_url
+    end
+  ```
+
+- On `Terminal` we can see that the code stopped
+
+  ```Bash
+    [63, 72] in /Users/roger-that/Documents/Codes/Ruby_On_Rails/P001_Portfolio/app/controllers/blogs_controller.rb
+      63:     end
+      64:   end
+      65:
+      66:   def toggle_status
+      67:     byebug
+    => 68:     redirect_to blogs_url
+      69:   end
+      70:
+      71:   private
+      72:
+  ```
+
+  - We now can start asking questions
+
+    ```Bash
+      params
+      # <ActionController::Parameters {"controller"=>"blogs", "action"=>"toggle_status", "id"=>"my-blog-post-2"} permitted: false>
+
+      blog = Blog.friendly.find(params[:id])
+      # Started GET "/blogs/my-blog-post-2/toggle_status" for ::1 at 2021-01-07 00:10:38 -0500
+      #  Blog Load (0.9ms)  SELECT "blogs".* FROM "blogs" WHERE "blogs"."slug" = $1 LIMIT $2  [["slug", "my-blog-post-2"], ["LIMIT", 1]]
+      #  ↳ (byebug):1:in `toggle_status'
+      # Processing by BlogsController#toggle_status as HTML
+      # #<Blog id: 4, title: "My Blog Post 2", body: "Quo doloribus ullam. Quidem nesciunt vitae. Vitae ...", created_at: "2021-01-07 04:30:07", updated_at: "2021-01-07 04:30:07", slug: "my-blog-post-2", status: "draft">
+
+      blog.published!
+      # Blog Update (10.5ms)  UPDATE "blogs" SET "updated_at" = $1, "status" = $2 WHERE "blogs"."id" = $3  [["updated_at", "2021-01-07 05:11:46.519320"], ["status", 1], ["id", 4]]
+      # ↳ (byebug):1:in `toggle_status'
+      #  (17.7ms)  COMMIT
+      # ↳ (byebug):1:in `toggle_status'
+    ```
