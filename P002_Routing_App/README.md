@@ -19,6 +19,10 @@
     - [Routes From Scratch](#routes-from-scratch)
       - [Posts Controller](#posts-controller)
       - [Posts Views](#posts-views)
+    - [Globbing](#globbing)
+      - [Posts Routes](#posts-routes)
+      - [Posts Controller](#posts-controller-1)
+      - [Posts Missing Page](#posts-missing-page)
 
 # ROUTING SYSTEM
 
@@ -529,4 +533,43 @@ In `config/routes.rb`
 
 ```HTML
   <h1>Here are the posts</h1>
+```
+
+### Globbing
+
+#### Posts Routes
+
+[Go Back to Contents](#table-of-contents)
+
+In `config/routes.rb`
+
+- Add a `globbing` (`route/*...`)
+
+  ```Ruby
+    get 'posts/*missing', to: 'posts#missing'
+  ```
+
+#### Posts Controller
+
+[Go Back to Contents](#table-of-contents)
+
+In `app/controllers/posts_controller.rb`
+
+- Create a new action called `missing`
+
+  ```Ruby
+    def missing
+    end
+  ```
+
+#### Posts Missing Page
+
+[Go Back to Contents](#table-of-contents)
+
+```Bash
+  touch app/views/posts/missing.html.erb
+```
+
+```HTML
+  <h1>These are not the posts that you were looking for</h1>
 ```
