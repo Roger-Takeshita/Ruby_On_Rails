@@ -23,6 +23,10 @@
       - [Posts Routes](#posts-routes)
       - [Posts Controller](#posts-controller-1)
       - [Posts Missing Page](#posts-missing-page)
+    - [Dynamic Routes](#dynamic-routes)
+      - [Pages Routes](#pages-routes)
+      - [Pages Controller](#pages-controller-1)
+      - [Pages Something Page](#pages-something-page)
 
 # ROUTING SYSTEM
 
@@ -572,4 +576,52 @@ In `app/controllers/posts_controller.rb`
 
 ```HTML
   <h1>These are not the posts that you were looking for</h1>
+```
+
+### Dynamic Routes
+
+[Go Back to Contents](#table-of-contents)
+
+Because we are using friendly routes, we can create an action to query our friendly routes using pieces of the route
+
+#### Pages Routes
+
+[Go Back to Contents](#table-of-contents)
+
+In `config/routes.rb`
+
+- Add a new route `query` that will map to `something` action
+
+  ```Ruby
+    get 'query/:else/:another_one', to: 'pages#something'
+    get 'query/:else', to: 'pages#something'
+  ```
+
+#### Pages Controller
+
+[Go Back to Contents](#table-of-contents)
+
+In `app/controllers/pages_controller.rb`
+
+- We can now get the `:else` params
+
+  ```Ruby
+    def something
+      @else = params[:else]
+      @another_one = params[:another_one]
+    end
+  ```
+
+#### Pages Something Page
+
+[Go Back to Contents](#table-of-contents)
+
+```Bash
+  touch app/views/pages/something.html.erb
+```
+
+```HTML
+  <h1><%= @else %></h1>
+  <h1><%= @another_one %></h1>
+
 ```
