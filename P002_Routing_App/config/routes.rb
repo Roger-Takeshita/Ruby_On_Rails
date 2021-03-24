@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   # get 'pages/contact'
   get 'my_custom/route/contact/page', to: 'pages#contact', as: 'short_contact'
   resources :blogs
+  resources :posts
 
   root to: 'pages#home'
 end

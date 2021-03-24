@@ -16,6 +16,9 @@
     - [Routes](#routes-1)
       - [Dashboard Controller](#dashboard-controller)
       - [Dashboard Views](#dashboard-views)
+    - [Routes From Scratch](#routes-from-scratch)
+      - [Posts Controller](#posts-controller)
+      - [Posts Views](#posts-views)
 
 # ROUTING SYSTEM
 
@@ -483,4 +486,47 @@ We need to do the same thing with or nested views
 ```Bash
   mkdir app/views/admin
   mv app/views/dashboard app/views/admin
+```
+
+### Routes From Scratch
+
+[Go Back to Contents](#table-of-contents)
+
+In `config/routes.rb`
+
+- We can create a new `resources`
+
+  - The resource will generate all our routes to the `posts` controller
+
+  ```Ruby
+    resources :posts
+  ```
+
+  ![](https://i.imgur.com/dEmdqeD.png)
+
+#### Posts Controller
+
+[Go Back to Contents](#table-of-contents)
+
+```Bash
+  touch app/controllers/posts_controller.rb
+```
+
+```Ruby
+  class PostsController < ApplicationController
+    def index
+    end
+  end
+```
+
+#### Posts Views
+
+[Go Back to Contents](#table-of-contents)
+
+```Bash
+  touch app/views/posts/index.html.erb
+```
+
+```HTML
+  <h1>Here are the posts</h1>
 ```
