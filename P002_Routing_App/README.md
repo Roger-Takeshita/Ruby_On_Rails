@@ -9,6 +9,13 @@
     - [Custom Routes](#custom-routes)
     - [Routes Prefixes](#routes-prefixes)
     - [Referencing Prefix](#referencing-prefix)
+  - [Root Route](#root-route)
+    - [Pages Controller](#pages-controller)
+    - [Home Page](#home-page)
+  - [Nested Routes](#nested-routes)
+    - [Routes](#routes-1)
+      - [Dashboard Controller](#dashboard-controller)
+      - [Dashboard Views](#dashboard-views)
 
 # ROUTING SYSTEM
 
@@ -311,4 +318,169 @@ In `app/views/pages/about.html.erb`
 
   #         about GET    /about(.:format)                         pages#about
   # short_contact GET    /my_custom/route/contact/page(.:format)  pages#contact
+```
+
+## Root Route
+
+[Go Back to Contents](#table-of-contents)
+
+In `config/routes.rb`
+
+- Let's define our root route
+
+  ```Ruby
+    Rails.application.routes.draw do
+      # get 'pages/about'
+      get 'about', to: 'pages#about'
+
+      # get 'pages/contact'
+      get 'my_custom/route/contact/page', to: 'pages#contact', as: 'short_contact'
+      resources :blogs
+
+      root to: 'pages#home'
+    end
+  ```
+
+### Pages Controller
+
+[Go Back to Contents](#table-of-contents)
+
+We can define our `home` action, we don't need to add anything in it, Rails is smart enough to render the new `home.html.erb`
+
+```Ruby
+  def home
+  end
+```
+
+### Home Page
+
+[Go Back to Contents](#table-of-contents)
+
+Create new file
+
+```Bash
+  app/views/pages/home.html.erb
+```
+
+In `app/views/pages/home.html.erb`
+
+```HTML
+  <h1>Home Page</h1>
+```
+
+## Nested Routes
+
+[Go Back to Contents](#table-of-contents)
+
+Let's generate a nested route
+
+```Bash
+  rails g controller Dashboard main user blog
+  create  app/controllers/dashboard_controller.rb
+  #        route  get 'dashboard/main'
+  # get 'dashboard/user'
+  # get 'dashboard/blog'
+  #       invoke  erb
+  #       create    app/views/dashboard
+  #       create    app/views/dashboard/main.html.erb
+  #       create    app/views/dashboard/user.html.erb
+  #       create    app/views/dashboard/blog.html.erb
+  #       invoke  helper
+  #       create    app/helpers/dashboard_helper.rb
+  #       invoke  assets
+  #       invoke    scss
+  #       create      app/assets/stylesheets/dashboard.scss
+```
+
+> The `main`, `user`, and `blog` are just pages
+
+### Routes
+
+[Go Back to Contents](#table-of-contents)
+
+In `config/routes.rb`
+
+- After generating the routes, rails will add the new routes in our `routes.rb`
+
+  ```Ruby
+    Rails.application.routes.draw do
+      get 'dashboard/main'
+      get 'dashboard/user'
+      get 'dashboard/blog'
+      # get 'pages/about'
+      get 'about', to: 'pages#about'
+
+      # get 'pages/contact'
+      get 'my_custom/route/contact/page', to: 'pages#contact', as: 'short_contact'
+      resources :blogs
+
+      root to: 'pages#home'
+    end
+  ```
+
+- We can nest our routes using **namespace**
+
+  ```Ruby
+    Rails.application.routes.draw do
+
+      namespace :admin do
+        get 'dashboard/main'
+        get 'dashboard/user'
+        get 'dashboard/blog'
+      end
+      # get 'pages/about'
+      get 'about', to: 'pages#about'
+
+      # get 'pages/contact'
+      get 'my_custom/route/contact/page', to: 'pages#contact', as: 'short_contact'
+      resources :blogs
+
+      root to: 'pages#home'
+    end
+  ```
+
+#### Dashboard Controller
+
+[Go Back to Contents](#table-of-contents)
+
+When we create a **namespace** rails will try to look into folder inside our controllers called `admin` and inside admin folder a file named `dashboard_controller.rb`
+
+```Bash
+  mkdir app/controllers/admin
+```
+
+Move the `app/controllers/dashboard_controller.rb` file to `app/controllers/admin`
+
+```Bash
+  mv app/controllers/dashboard_controller.rb app/controllers/admin
+```
+
+In `app/controllers/admin/dashboard_controller.rb`
+
+- To make it work our nesting routes, we need to update the class
+
+  ```Ruby
+    class Admin::DashboardController < ApplicationController
+      def main
+      end
+
+      def user
+      end
+
+      def blog
+      end
+    end
+  ```
+
+  > To nest a route we need to add the class name in front of the Controller eg. `class Admin::DashboardController`
+
+#### Dashboard Views
+
+[Go Back to Contents](#table-of-contents)
+
+We need to do the same thing with or nested views
+
+```Bash
+  mkdir app/views/admin
+  mv app/views/dashboard app/views/admin
 ```
